@@ -4,6 +4,8 @@ import 'package:contact_book_app/helpers/contact_helper.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'package:image_picker/image_picker.dart';
+
 class ContactPage extends StatefulWidget {
   final Contact contact;
 
@@ -63,17 +65,70 @@ class _ContactPageState extends State<ContactPage> {
           children: <Widget>[
             GestureDetector(
               child: Container(
-                width: 80.0,
-                height: 80.0,
+                width: 100.0,
+                height: 100.0,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   image: DecorationImage(
                     image: _editedContact.image != null ? 
                       FileImage(File(_editedContact.image)) :
-                        AssetImage("images/person.png")
+                        AssetImage("images/person.png"),
+                    fit: BoxFit.cover
                   )
                 ),
               ),
+              onTap: () {
+                showModalBottomSheet(
+                  context: context, 
+                  builder: (context) {
+                    return BottomSheet(
+                      onClosing: () {},
+                      builder: (context) {
+                        return Container(
+                          padding: EdgeInsets.all(10.0),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: <Widget>[
+                              Padding(
+                                padding: EdgeInsets.all(10.0),
+                                child: FlatButton(
+                                  child: Text("Tirar Foto", style: TextStyle(color: Colors.red, fontSize: 20.0),),
+                                  onPressed: () {
+                                    ImagePicker.pickImage(source: ImageSource.camera).then((file) {
+                                      if (file == null) return;
+                                      setState(() {
+                                        _editedContact.image = file.path;
+                                        _userEdited = true;
+                                        Navigator.pop(context);
+                                      });
+                                    });
+                                  },
+                                ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.all(10.0),
+                                child: FlatButton(
+                                  child: Text("Selecionar da Galeria", style: TextStyle(color: Colors.red, fontSize: 20.0),),
+                                  onPressed: () {
+                                    ImagePicker.pickImage(source: ImageSource.gallery).then((file) {
+                                      if (file == null) return;
+                                      setState(() {
+                                        _editedContact.image = file.path;
+                                        _userEdited = true;
+                                        Navigator.pop(context);
+                                      });
+                                    });
+                                  },
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  }
+                );
+              },
             ),
             TextField(
               decoration: InputDecoration(labelText: "Nome"),

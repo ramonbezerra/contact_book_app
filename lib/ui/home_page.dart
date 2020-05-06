@@ -4,6 +4,10 @@ import 'package:contact_book_app/helpers/contact_helper.dart';
 import 'package:contact_book_app/ui/contact_page.dart';
 import 'package:flutter/material.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+
+enum OrderOptions {orderaz, orderza}
+
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
@@ -28,6 +32,21 @@ class _HomePageState extends State<HomePage> {
         title: Text("Contatos"),
         backgroundColor: Colors.red,
         centerTitle: true,
+        actions: <Widget>[
+          PopupMenuButton<OrderOptions>(
+            itemBuilder: (context) => <PopupMenuEntry<OrderOptions>>[
+              const PopupMenuItem<OrderOptions>(
+                child: Text("Ordenar de A-Z"),
+                value: OrderOptions.orderaz,
+              ),
+              const PopupMenuItem<OrderOptions>(
+                child: Text("Ordenar de Z-A"),
+                value: OrderOptions.orderza,
+              ),
+            ],
+            onSelected: _orderList,
+          )
+        ],
       ),
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton.extended(
@@ -59,31 +78,32 @@ class _HomePageState extends State<HomePage> {
           child: Row(
             children: <Widget>[
               Container(
-                width: 80.0,
-                height: 80.0,
+                width: 100.0,
+                height: 100.0,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   image: DecorationImage(
                     image: contacts[index].image != null ? 
                       FileImage(File(contacts[index].image)) :
-                        AssetImage("images/person.png")
+                        AssetImage("images/person.png"),
+                    fit: BoxFit.cover
                   )
                 ),
               ),
               Padding(
                 padding: EdgeInsets.all(10.0),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     Text(contacts[index].name ?? "", 
                       style: TextStyle(fontSize: 22.0,
                               fontWeight: FontWeight.bold)
                     ),
                     Text(contacts[index].email ?? "", 
-                      style: TextStyle(fontSize: 18.0,
-                              fontWeight: FontWeight.bold)
+                      style: TextStyle(fontSize: 14.0)
                     ),
                     Text(contacts[index].phone ?? "", 
-                      style: TextStyle(fontSize: 18.0,
+                      style: TextStyle(fontSize: 16.0,
                               fontWeight: FontWeight.bold)
                     ),
                   ],
@@ -128,7 +148,8 @@ class _HomePageState extends State<HomePage> {
                     child: FlatButton(
                       child: Text("Ligar", style: TextStyle(color: Colors.red, fontSize: 20.0),),
                       onPressed: () {
-
+                        launch("tel:${contacts[index].phone}");
+                        Navigator.pop(context);
                       },
                     ),
                   ),
@@ -174,8 +195,7 @@ class _HomePageState extends State<HomePage> {
                               ]
                             );
                           }
-                        );
-                        
+                        );                        
                       },
                     ),
                   ),
@@ -193,6 +213,24 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         contacts = list;
       });
+    });
+  }
+
+  void _orderList(OrderOptions result) {
+    switch (result) {
+      case OrderOptions.orderaz:
+        contacts.sort((a,b) {
+          return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+        });
+        break;
+      case OrderOptions.orderza:
+        contacts.sort((a,b) {
+          return b.name.toLowerCase().compareTo(a.name.toLowerCase());
+        });
+        break;
+    }
+    setState(() {
+      
     });
   }
 }
